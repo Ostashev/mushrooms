@@ -126,14 +126,20 @@ async def remove_mushroom_from_basket(basket_id: int, mushroom_id: int) -> Baske
 
         basket = baskets_db[basket_id]
 
-        found = False
-        for i, m in enumerate(basket.mushrooms):
-            if m.id == mushroom_id:
-                del basket.mushrooms[i]
-                found = True
+        found_index = None
+        for i, mushroom in enumerate(basket.mushrooms):
+            if mushroom.id == mushroom_id:
+                found_index = i
                 break
 
-        if not found:
+        if found_index is None:
             raise ValueError("Mushroom not found in basket")
 
-        return await get_basket(basket_id)
+        del basket.mushrooms[found_index]
+
+        return Basket(
+            id=basket.id,
+            owner=basket.owner,
+            capacity=basket.capacity,
+            mushrooms=[m for m in basket.mushrooms if m.id in mushrooms_db]
+        )
